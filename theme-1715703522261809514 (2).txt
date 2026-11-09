@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhà Của Di Hạ - Web Đọc Truyện Đam Mỹ</title>
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Merriweather', 'serif'],
+          },
+          colors: {
+            rosebrand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    input, textarea, select {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+    
+    .reader-text-sm { font-size: 0.95rem; line-height: 1.7; }
+    .reader-text-md { font-size: 1.1rem; line-height: 1.8; }
+    .reader-text-lg { font-size: 1.25rem; line-height: 1.9; }
+    .reader-text-xl { font-size: 1.4rem; line-height: 2.0; }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-toast { animation: slideDown 0.3s ease-out forwards; }
+  </style>
+</head>
+
+<body class="bg-rosebrand-50/60 text-gray-800 min-h-screen flex flex-col font-sans selection:bg-rosebrand-200">
+
+  <!-- Lớp phủ AdBlocker -->
+  <div id="adblockOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-4 shadow-2xl border border-rosebrand-100">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900">Đã Phát Hiện Chặn Quảng Cáo</h3>
+      <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+        Trang web yêu cầu không sử dụng trình chặn quảng cáo để đảm bảo các liên kết hoạt động chính xác. Vui lòng tắt tiện ích chặn quảng cáo và tải lại trang để tiếp tục đọc truyện.
+      </p>
+      <button onclick="location.reload()" class="w-full py-3 bg-rosebrand-500 hover:bg-rosebrand-600 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition active:scale-95">
+        Đã tắt, tải lại trang
+      </button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-rosebrand-100 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer group" onclick="navigateToHome()">
+        <div class="w-10 h-10 rounded-2xl bg-rosebrand-500 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+          <i class="fa-solid fa-heart text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-rosebrand-600 tracking-tight flex items-center gap-1.5">
+            Nhà Của Di Hạ
+            <span class="text-[10px] font-normal px-2 py-0.5 bg-rosebrand-100 text-rosebrand-700 rounded-full">Đam Mỹ</span>
+          </h1>
+          <p class="text-[11px] text-gray-400 font-medium">Không gian đọc truyện ngọt ngào & ấm áp</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <div id="connectionBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span>Đang kết nối Firebase...</span>
+        </div>
+        <button onclick="showAdminModal()" class="px-4 py-2 bg-rosebrand-500 hover:bg-rosebrand-600 text-white rounded-full text-xs font-semibold transition-all shadow-sm flex items-center space-x-1.5 active:scale-95">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Quản Trị</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Alert -->
+  <div id="toastContainer" class="fixed top-16 right-4 z-50 space-y-2 pointer-events-none max-w-sm w-full"></div>
+
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
+
+    <!-- HOME SECTION -->
+    <section id="sec-home" class="space-y-6">
+      <div class="bg-gradient-to-r from-rosebrand-500 to-pink-500 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 opacity-15 pointer-events-none">
+          <i class="fa-solid fa-book-open text-9xl"></i>
+        </div>
+        <div class="relative z-10 max-w-2xl space-y-2">
+          <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide uppercase">Chào mừng tới blog</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Thế Giới Truyện Đam Mỹ Chọn Lọc</h2>
+          <p class="text-rosebrand-100 text-xs sm:text-sm leading-relaxed">Cùng chìm đắm vào những bộ truyện ngôn tình đam mỹ nhẹ nhàng, ngọt ngào & sâu lắng do Di Hạ sưu tầm & edit.</p>
+        </div>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-rosebrand-100 flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div class="relative w-full md:w-80">
+          <input type="text" id="searchInput" oninput="filterStories()" placeholder="Tìm tên truyện, thể loại..." class="w-full pl-10 pr-4 py-2.5 bg-rosebrand-50/50 border border-rosebrand-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-rosebrand-400 focus:bg-white transition">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-rosebrand-400 text-sm"></i>
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+          <button onclick="setCategoryFilter('all')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-rosebrand-500 text-white shadow-sm whitespace-nowrap" data-cat="all">Bấm vào đây để xem danh sách truyện</button>
+          <button onclick="setCategoryFilter('Truyện Ngắn')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-rosebrand-50 text-rosebrand-700 hover:bg-rosebrand-100 whitespace-nowrap" data-cat="Truyện Ngắn">Truyện Ngắn</button>
+          <button onclick="setCategoryFilter('Truyện Dài')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-rosebrand-50 text-rosebrand-700 hover:bg-rosebrand-100 whitespace-nowrap" data-cat="Truyện Dài">Truyện Dài</button>
+          <button onclick="setCategoryFilter('Hoàn Thành')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-rosebrand-50 text-rosebrand-700 hover:bg-rosebrand-100 whitespace-nowrap" data-cat="Hoàn Thành">Hoàn Thành</button>
+        </div>
+      </div>
+
+      <!-- Novel Grid View -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h3 id="sectionTitle" class="text-base font-bold text-gray-800 flex items-center gap-2">
+            <i class="fa-solid fa-sparkles text-rosebrand-500"></i> Danh Sách Truyện Mới Cập Nhật
+          </h3>
+          <span id="storyCountBadge" class="text-xs text-gray-500 font-medium">Đang tải...</span>
+        </div>
+
+        <div id="storyList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-5"></div>
+
+        <!-- Skeleton Loader -->
+        <div id="storySkeleton" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+          <div class="bg-white rounded-2xl p-3 border border-rosebrand-100 animate-pulse space-y-3">
+            <div class="bg-rosebrand-100 rounded-xl aspect-[3/4] w-full"></div>
+            <div class="h-4 bg-rosebrand-100 rounded w-3/4"></div>
+            <div class="h-3 bg-rosebrand-50 rounded w-1/2"></div>
+          </div>
+          <div class="bg-white rounded-2xl p-3 border border-rosebrand-100 animate-pulse space-y-3">
+            <div class="bg-rosebrand-100 rounded-xl aspect-[3/4] w-full"></div>
+            <div class="h-4 bg-rosebrand-100 rounded w-3/4"></div>
+            <div class="h-3 bg-rosebrand-50 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pagination" class="flex justify-center items-center gap-2 pt-4"></div>
+    </section>
+
+    <!-- DETAIL & READER SECTION -->
+    <section id="sec-detail" class="hidden space-y-6">
+      <button onclick="navigateToHome()" class="px-3 py-1.5 bg-white border border-rosebrand-200 hover:bg-rosebrand-50 rounded-xl text-xs text-rosebrand-600 font-semibold transition flex items-center gap-1.5 shadow-2xs">
+        <i class="fa-solid fa-chevron-left text-xs"></i> Quay lại trang chủ
+      </button>
+
+      <div class="bg-white p-5 sm:p-7 rounded-3xl shadow-sm border border-rosebrand-100 flex flex-col md:flex-row gap-6">
+        <img id="detailCover" src="" class="w-full md:w-52 h-72 object-cover rounded-2xl shadow-md border border-rosebrand-100" alt="Cover">
+        <div class="flex-grow space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="detailBadge" class="px-3 py-1 bg-rosebrand-100 text-rosebrand-700 font-semibold rounded-full text-xs"></span>
+            <span id="detailChapterCount" class="px-3 py-1 bg-gray-100 text-gray-600 font-medium rounded-full text-xs"></span>
+          </div>
+          <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight"></h2>
+          
+          <div class="pt-2 border-t border-gray-100">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Mô tả / Tóm tắt truyện</h4>
+            <p id="detailDesc" class="text-xs sm:text-sm text-gray-600 leading-relaxed font-sans whitespace-pre-line"></p>
+          </div>
+
+          <div id="shopeeUnlockBox" class="pt-4">
+            <div class="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl space-y-3">
+              <div class="flex items-center gap-2 text-orange-700 font-bold text-xs sm:text-sm">
+                <i class="fa-solid fa-lock text-base text-orange-500"></i>
+                <span>Nội dung truyện đang bị khóa!</span>
+              </div>
+              <p class="text-xs text-gray-600">Quý độc giả vui lòng bấm vào link Shopee bên dưới để mở khóa đọc toàn bộ các chương truyện.</p>
+              
+              <button onclick="unlockContentWithShopee()" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition transform active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-sm"></i>
+                <span>Nhấp Link Shopee Để Mở Khóa Đọc Truyện</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="readingArea" class="hidden bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-rosebrand-100 space-y-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-rosebrand-100 pb-4">
+          <div class="w-full sm:w-auto flex items-center gap-2">
+            <label for="chapterSelect" class="text-xs font-bold text-gray-600 whitespace-nowrap">Chọn chương:</label>
+            <select id="chapterSelect" onchange="changeChapter(this.value)" class="w-full sm:w-64 bg-rosebrand-50 border border-rosebrand-200 text-xs font-semibold px-3 py-2 rounded-xl text-rosebrand-800 focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-2xl border border-gray-200">
+            <span class="text-[11px] font-semibold text-gray-500"><i class="fa-solid fa-text-height"></i> Cỡ chữ:</span>
+            <button onclick="setReaderFontSize('sm')" class="font-btn-sm text-xs px-2 py-0.5 rounded font-bold hover:bg-gray-200">A-</button>
+            <button onclick="setReaderFontSize('md')" class="font-btn-md text-xs px-2 py-0.5 rounded font-bold bg-rosebrand-500 text-white">A</button>
+            <button onclick="setReaderFontSize('lg')" class="font-btn-lg text-xs px-2 py-0.5 rounded font-bold hover:bg-gray-200">A+</button>
+            <button onclick="setReaderFontSize('xl')" class="font-btn-xl text-xs px-2 py-0.5 rounded font-bold hover:bg-gray-200">A++</button>
+          </div>
+        </div>
+
+        <div class="space-y-4 max-w-3xl mx-auto py-2">
+          <h3 id="chapterTitle" class="text-lg sm:text-xl font-bold text-rosebrand-600 text-center tracking-tight"></h3>
+          
+          <div id="chapterShopeeLock" class="hidden p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl text-center space-y-3 my-4">
+            <div class="flex items-center justify-center gap-2 text-orange-700 font-bold text-xs sm:text-sm">
+              <i class="fa-solid fa-lock text-base text-orange-500"></i>
+              <span>Chương này yêu cầu mở khóa qua Shopee!</span>
+            </div>
+            <p class="text-xs text-gray-600">Mỗi chương mới đều cần nhấp link Shopee để ủng hộ nhà dịch và đọc nội dung.</p>
+            <button onclick="unlockContentWithShopee()" class="inline-flex px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95 items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-shopping text-sm"></i>
+              <span>Nhấp Link Shopee Để Xem Nội Dung Chương Này</span>
+            </button>
+          </div>
+
+          <div id="chapterContent" class="text-gray-800 font-serif whitespace-pre-line reader-text-md space-y-4 leading-relaxed"></div>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-rosebrand-100 pt-4 max-w-3xl mx-auto">
+          <button id="btnPrevChapter" onclick="navigateChapter(-1)" class="px-4 py-2 bg-rosebrand-50 text-rosebrand-700 hover:bg-rosebrand-100 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-left"></i> Chương trước
+          </button>
+          <button id="btnNextChapter" onclick="navigateChapter(1)" class="px-4 py-2 bg-rosebrand-50 text-rosebrand-700 hover:bg-rosebrand-100 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+            Chương tiếp <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="bg-white p-5 sm:p-7 rounded-3xl shadow-sm border border-rosebrand-100 space-y-4">
+        <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+          <i class="fa-solid fa-comments text-rosebrand-500"></i> Bình Luận & Cảm Nhận Độc Giả
+        </h3>
+
+        <div class="p-4 bg-rosebrand-50/40 rounded-2xl border border-rosebrand-100 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="commentAuthor" placeholder="Tên / Biệt danh của bạn..." class="px-3.5 py-2 bg-white border border-rosebrand-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+            <input type="text" id="commentInput" placeholder="Viết cảm tưởng gửi editor Di Hạ..." class="sm:col-span-2 px-3.5 py-2 bg-white border border-rosebrand-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+          </div>
+          <div class="flex justify-end">
+            <button onclick="submitComment()" class="px-5 py-2 bg-rosebrand-500 hover:bg-rosebrand-600 text-white font-bold rounded-xl text-xs shadow-sm transition active:scale-95">
+              Gửi Bình Luận
+            </button>
+          </div>
+        </div>
+
+        <div id="commentList" class="space-y-3 pt-2"></div>
+      </div>
+    </section>
+
+    <!-- ADMIN SECTION -->
+    <section id="sec-admin" class="hidden space-y-6">
+      <div class="flex items-center justify-between bg-white p-5 rounded-3xl shadow-sm border border-rosebrand-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-rosebrand-100 text-rosebrand-600 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-user-gear text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-gray-900">Trang Quản Trị Hệ Thống</h2>
+            <p class="text-xs text-gray-400">Quản lý kho truyện, thêm/sửa chương & theo dõi cơ sở dữ liệu</p>
+          </div>
+        </div>
+        <button onclick="navigateToHome()" class="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-200 transition">
+          Thoát Admin
+        </button>
+      </div>
+
+      <div id="adminRuleNotice" class="p-4 bg-blue-50 border border-blue-200 rounded-2xl space-y-1 text-xs text-blue-900">
+        <p class="font-bold flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-blue-500"></i> Hướng dẫn cấu hình Firebase Firestore:
+        </p>
+        <p>Nếu bạn không đăng hoặc xóa được truyện, vui lòng đảm bảo trong Firebase Console &gt; Firestore Database &gt; tab <b>Rules</b> đã cho phép đọc/ghi:</p>
+        <code class="block bg-blue-100 p-2 rounded text-[11px] font-mono mt-1 text-blue-950">allow read, write: if true;</code>
+      </div>
+
+      <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-rosebrand-100 space-y-5">
+        <h3 id="formTitle" class="text-base font-bold text-gray-800 border-b border-rosebrand-100 pb-3 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-rosebrand-500"></i> Thêm Truyện Mới
+        </h3>
+
+        <form id="storyForm" onsubmit="saveStory(event)" class="space-y-4">
+          <input type="hidden" id="editStoryId">
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-bold text-gray-700">Tên Truyện <span class="text-red-500">*</span></label>
+              <input type="text" id="formTitleInput" required placeholder="Ví dụ: Cậu Là Ánh Nắng Của Tớ" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700">Thể Loại <span class="text-red-500">*</span></label>
+              <select id="formCatSelect" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+                <option value="Truyện Ngắn">Truyện Ngắn</option>
+                <option value="Truyện Dài">Truyện Dài</option>
+                <option value="Hoàn Thành">Hoàn Thành</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700">URL Ảnh Bìa (Link Image) <span class="text-red-500">*</span></label>
+              <input type="url" id="formCoverInput" required placeholder="https://i.imgur.com/... hoac link anh" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700">Link Shopee Mở Khóa <span class="text-red-500">*</span></label>
+              <input type="url" id="formShopeeInput" required placeholder="https://shopee.vn/..." class="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-gray-700">Mô Tả / Tóm Tắt Nội Dung</label>
+            <textarea id="formDescInput" rows="3" placeholder="Viết vài dòng giới thiệu vắn tắt nội dung..." class="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-xs mt-1 focus:outline-none focus:ring-2 focus:ring-rosebrand-400"></textarea>
+          </div>
+
+          <div class="border-t border-gray-100 pt-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-gray-800">Danh Sách Các Chương Truyện</label>
+              <button type="button" onclick="addChapterInput()" class="px-3 py-1 bg-rosebrand-100 text-rosebrand-700 hover:bg-rosebrand-200 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> Thêm Chương
+              </button>
+            </div>
+
+            <div id="chaptersContainer" class="space-y-3"></div>
+          </div>
+
+          <div class="flex gap-3 pt-3 border-t border-gray-100">
+            <button type="submit" id="btnSaveStory" class="px-6 py-2.5 bg-rosebrand-500 hover:bg-rosebrand-600 text-white font-bold rounded-xl text-xs shadow-md transition active:scale-95 flex items-center gap-1.5">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Lưu Truyện Vào Firestore</span>
+            </button>
+            <button type="button" onclick="resetForm()" class="px-5 py-2.5 bg-gray-100 text-gray-600 font-semibold rounded-xl text-xs hover:bg-gray-200 transition">
+              Hủy / Làm Mới
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl shadow-sm border border-rosebrand-100 space-y-4">
+        <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-rosebrand-500"></i> Truyện Đã Đăng Trên Cơ Sở Dữ Liệu
+        </h3>
+        <div id="adminStoryList" class="space-y-3"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Admin -->
+  <div id="passwordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white p-6 sm:p-7 rounded-3xl shadow-2xl w-full max-w-sm space-y-4 text-center transform transition-all">
+      <div class="w-14 h-14 bg-rosebrand-100 text-rosebrand-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+        <i class="fa-solid fa-key"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-gray-900">Xác Nhận Quyền Quản Trị</h3>
+        <p class="text-xs text-gray-400 mt-1">Vui lòng nhập mật khẩu quản trị Di Hạ</p>
+      </div>
+      
+      <input type="password" id="adminPasswordInput" placeholder="Nhập mật khẩu..." onkeyup="if(event.key==='Enter') verifyPassword()" class="w-full px-4 py-2.5 border border-rosebrand-200 rounded-xl text-sm text-center focus:outline-none focus:ring-2 focus:ring-rosebrand-400">
+      
+      <div class="flex gap-2 pt-1">
+        <button onclick="closePasswordModal()" class="w-1/2 py-2.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-xl hover:bg-gray-200 transition">Hủy</button>
+        <button onclick="verifyPassword()" class="w-1/2 py-2.5 bg-rosebrand-500 text-white text-xs font-bold rounded-xl hover:bg-rosebrand-600 transition shadow-sm">Đăng Nhập</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    document.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      showToast("Nội dung truyện được bảo vệ bản quyền!", "error");
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || (e.ctrlKey && ['c', 'x', 'a', 'u', 's', 'p'].includes(e.key.toLowerCase()))) {
+        e.preventDefault();
+        showToast("Phím tắt sao chép bị vô hiệu hóa!", "error");
+      }
+    });
+
+    async function checkAdBlocker() {
+      try {
+        await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+      } catch (error) {
+        const overlay = document.getElementById('adblockOverlay');
+        if (overlay) overlay.classList.remove('hidden');
+      }
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0e0315DLvV22WS8GvZS_Vme_Si2Njo_4",
+      authDomain: "nhacuadiha.firebaseapp.com",
+      projectId: "nhacuadiha",
+      storageBucket: "nhacuadiha.firebasestorage.app",
+      messagingSenderId: "886162062377",
+      appId: "1:886162062377:web:3c7504e9639e97d7fdb038",
+      measurementId: "G-JCSFFXV8S6"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+    window.db = db;
+
+    window.allStories = [];
+    window.isInitialized = false;
+    let currentFilter = 'all';
+    let currentPage = 1;
+    const pageSize = 8;
+    let selectedStory = null;
+    let currentChapterIndex = 0;
+    let commentsUnsubscribe = null;
+    let isShopeeUnlocked = false;
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bg = type === 'error' ? 'bg-red-500' : (type === 'success' ? 'bg-emerald-600' : 'bg-rosebrand-600');
+      toast.className = `${bg} text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center justify-between pointer-events-auto animate-toast`;
+      
+      toast.innerHTML = `
+        <div class="flex items-center gap-2">
+          <i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : (type === 'success' ? 'fa-circle-check' : 'fa-bell')}"></i>
+          <span>${message}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="ml-3 text-white/80 hover:text-white">&times;</button>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    window.initFirebaseListener = function() {
+      let isLoaded = false;
+
+      const cached = localStorage.getItem('diha_stories_cache');
+      if (cached) {
+        try {
+          window.allStories = JSON.parse(cached);
+          document.getElementById('storySkeleton')?.classList.add('hidden');
+          setCategoryFilter(currentFilter);
+          renderAdminStoryList();
+          isLoaded = true;
+        } catch(e) {}
+      }
+
+      const fallbackTimer = setTimeout(() => {
+        if (!isLoaded) {
+          document.getElementById('storySkeleton')?.classList.add('hidden');
+          const countBadge = document.getElementById('storyCountBadge');
+          if (countBadge && window.allStories.length === 0) {
+            countBadge.innerText = "Không thể tải dữ liệu trực tuyến. Vui lòng kiểm tra lại kết nối!";
+          }
+        }
+      }, 3000);
+
+      db.collection("stories").onSnapshot((snapshot) => {
+        isLoaded = true;
+        clearTimeout(fallbackTimer);
+
+        const stories = [];
+        snapshot.forEach((docSnap) => {
+          stories.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        
+        window.allStories = stories;
+        localStorage.setItem('diha_stories_cache', JSON.stringify(stories));
+
+        document.getElementById('storySkeleton')?.classList.add('hidden');
+        setCategoryFilter(currentFilter);
+        renderAdminStoryList();
+
+        const badge = document.getElementById('connectionBadge');
+        if (badge) {
+          badge.className = "hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200";
+          badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Firebase Online</span>`;
+        }
+
+        if (!window.isInitialized) {
+          window.isInitialized = true;
+          checkUrlRoute();
+        }
+      }, (error) => {
+        console.error("Firestore Listen Error: ", error);
+        clearTimeout(fallbackTimer);
+        document.getElementById('storySkeleton')?.classList.add('hidden');
+        showToast("Lỗi kết nối Firebase trên thiết bị", "error");
+        
+        const cachedFallback = localStorage.getItem('diha_stories_cache');
+        if (cachedFallback) {
+          try {
+            window.allStories = JSON.parse(cachedFallback);
+            setCategoryFilter(currentFilter);
+            renderAdminStoryList();
+          } catch(e) {}
+        }
+      });
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      window.initFirebaseListener();
+      checkAdBlocker();
+      checkUrlRoute();
+    });
+
+    window.addEventListener('popstate', () => {
+      checkUrlRoute();
+    });
+
+    function checkUrlRoute() {
+      const hash = window.location.hash;
+      if (hash.startsWith('#story=')) {
+        const storyId = hash.replace('#story=', '');
+        const found = window.allStories.find(s => s.id === storyId);
+        if (found) {
+          openStoryDetail(storyId, false);
+        } else if (window.allStories.length === 0) {
+          setTimeout(() => {
+            const retryFound = window.allStories.find(s => s.id === storyId);
+            if (retryFound) openStoryDetail(storyId, false);
+          }, 1000);
+        }
+      } else if (hash === '#admin') {
+        showAdminSection(false);
+      } else {
+        showSection('home', false);
+      }
+    }
+
+    function showSection(sectionId, updateHistory = true) {
+      ['home', 'detail', 'admin'].forEach(sec => {
+        const el = document.getElementById(`sec-${sec}`);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById(`sec-${sectionId}`);
+      if (target) target.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (updateHistory) {
+        if (sectionId === 'home') {
+          history.pushState(null, '', window.location.pathname);
+        } else if (sectionId === 'admin') {
+          history.pushState(null, '', '#admin');
+        }
+      }
+    }
+
+    function navigateToHome(updateHistory = true) {
+      selectedStory = null;
+      isShopeeUnlocked = false;
+      showSection('home', updateHistory);
+    }
+
+    function showAdminSection(updateHistory = true) {
+      resetForm();
+      showSection('admin', updateHistory);
+    }
+
+    function renderHomePage() {
+      const storyList = document.getElementById('storyList');
+      if (!storyList) return;
+      const searchVal = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+
+      let filtered = window.allStories.filter(s => {
+        const matchesCat = currentFilter === 'all' || s.category === currentFilter;
+        const matchesSearch = (s.title || '').toLowerCase().includes(searchVal) || (s.description || '').toLowerCase().includes(searchVal);
+        return matchesCat && matchesSearch;
+      });
+
+      const countBadge = document.getElementById('storyCountBadge');
+      if (countBadge) countBadge.innerText = `Tìm thấy ${filtered.length} truyện`;
+
+      const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const start = (currentPage - 1) * pageSize;
+      const pagedStories = filtered.slice(start, start + pageSize);
+
+      if (pagedStories.length === 0) {
+        storyList.innerHTML = `
+          <div class="col-span-full py-12 text-center space-y-3 bg-white rounded-3xl border border-rosebrand-100 p-6">
+            <i class="fa-solid fa-book-open-reader text-4xl text-rosebrand-300"></i>
+            <p class="text-xs font-semibold text-gray-500">Chưa có truyện nào phù hợp với tìm kiếm của bạn.</p>
+          </div>
+        `;
+      } else {
+        storyList.innerHTML = pagedStories.map(s => `
+          <div onclick="openStoryDetail('${s.id}')" class="bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 border border-rosebrand-100 cursor-pointer group flex flex-col h-full">
+            <div class="relative aspect-[3/4] overflow-hidden bg-rosebrand-50">
+              <img src="${s.cover || 'https://placehold.co/300x400/fecdd3/be123c?text=Di+Ha'}" 
+                   onerror="this.src='https://placehold.co/300x400/fecdd3/be123c?text=Di+Ha'" 
+                   class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <span class="absolute top-2.5 right-2.5 px-2.5 py-1 bg-rosebrand-600/90 text-white rounded-full text-[10px] font-bold backdrop-blur-sm shadow-2xs">${s.category || 'Đam Mỹ'}</span>
+            </div>
+            <div class="p-3.5 flex flex-col flex-grow justify-between space-y-2">
+              <h4 class="font-bold text-xs sm:text-sm text-gray-800 group-hover:text-rosebrand-600 transition line-clamp-2 leading-snug">${s.title}</h4>
+              <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-rosebrand-50">
+                <span class="flex items-center gap-1 font-medium text-rosebrand-500">
+                  <i class="fa-solid fa-bookmark"></i> ${s.chapters ? s.chapters.length : 0} Chương
+                </span>
+                <span class="text-[10px]">Đọc ngay &rarr;</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const pagination = document.getElementById('pagination');
+      if (pagination) {
+        pagination.innerHTML = '';
+        if (totalPages > 1) {
+          for (let i = 1; i <= totalPages; i++) {
+            pagination.innerHTML += `
+              <button onclick="goToPage(${i})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${i === currentPage ? 'bg-rosebrand-500 text-white shadow-xs' : 'bg-white text-rosebrand-700 border border-rosebrand-200 hover:bg-rosebrand-50'}">${i}</button>
+            `;
+          }
+        }
+      }
+    }
+
+    function setCategoryFilter(cat) {
+      currentFilter = cat;
+      currentPage = 1;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.dataset.cat === cat) {
+          btn.className = "cat-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-rosebrand-500 text-white shadow-sm whitespace-nowrap";
+        } else {
+          btn.className = "cat-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-rosebrand-50 text-rosebrand-700 hover:bg-rosebrand-100 whitespace-nowrap";
+        }
+      });
+      renderHomePage();
+    }
+
+    function filterStories() { currentPage = 1; renderHomePage(); }
+    function goToPage(page) { currentPage = page; renderHomePage(); }
+
+    function openStoryDetail(storyId, updateHistory = true) {
+      selectedStory = window.allStories.find(s => s.id === storyId);
+      if (!selectedStory) return;
+
+      document.getElementById('detailCover').src = selectedStory.cover;
+      document.getElementById('detailBadge').innerText = selectedStory.category || 'Đam Mỹ';
+      document.getElementById('detailChapterCount').innerText = `${selectedStory.chapters ? selectedStory.chapters.length : 0} Chương`;
+      document.getElementById('detailTitle').innerText = selectedStory.title;
+      document.getElementById('detailDesc').innerText = selectedStory.description || "Chưa có tóm tắt cho bộ truyện này.";
+
+      isShopeeUnlocked = false;
+      document.getElementById('readingArea').classList.add('hidden');
+      document.getElementById('shopeeUnlockBox').classList.remove('hidden');
+
+      listenToComments(storyId);
+      showSection('detail', false);
+
+      if (updateHistory) {
+        history.pushState(null, '', `#story=${storyId}`);
+      }
+    }
+
+    function unlockContentWithShopee() {
+      if (selectedStory && selectedStory.shopeeLink) {
+        window.open(selectedStory.shopeeLink, '_blank');
+        
+        isShopeeUnlocked = true;
+        document.getElementById('readingArea').classList.remove('hidden');
+        document.getElementById('shopeeUnlockBox').classList.add('hidden');
+        showToast("Đã mở khóa nội dung đọc truyện thành công!", "success");
+
+        const chapterSelect = document.getElementById('chapterSelect');
+        if (selectedStory.chapters && selectedStory.chapters.length > 0) {
+          chapterSelect.innerHTML = selectedStory.chapters.map((ch, idx) => `
+            <option value="${idx}">Chương ${idx + 1}: ${ch.title}</option>
+          `).join('');
+          changeChapter(0);
+        } else {
+          chapterSelect.innerHTML = `<option>Chưa có chương nào</option>`;
+          document.getElementById('chapterTitle').innerText = "Thông Báo";
+          document.getElementById('chapterContent').innerText = "Truyện này hiện chưa được bổ sung nội dung chương.";
+          document.getElementById('chapterShopeeLock').classList.add('hidden');
+        }
+      } else {
+        showToast("Link Shopee chưa được thiết lập cho truyện này.", "error");
+      }
+    }
+
+    function changeChapter(index) {
+      currentChapterIndex = parseInt(index);
+      if (!selectedStory || !selectedStory.chapters) return;
+
+      const ch = selectedStory.chapters[currentChapterIndex];
+      const contentEl = document.getElementById('chapterContent');
+      const lockBanner = document.getElementById('chapterShopeeLock');
+
+      if (ch) {
+        document.getElementById('chapterTitle').innerText = `Chương ${currentChapterIndex + 1}: ${ch.title}`;
+        
+        if (isShopeeUnlocked) {
+          contentEl.innerText = ch.content;
+          contentEl.classList.remove('hidden');
+          lockBanner.classList.add('hidden');
+        } else {
+          contentEl.innerText = "";
+          contentEl.classList.add('hidden');
+          lockBanner.classList.remove('hidden');
+        }
+      }
+
+      const btnPrev = document.getElementById('btnPrevChapter');
+      const btnNext = document.getElementById('btnNextChapter');
+      if (btnPrev) btnPrev.disabled = currentChapterIndex <= 0;
+      if (btnNext) btnNext.disabled = currentChapterIndex >= selectedStory.chapters.length - 1;
+    }
+
+    function navigateChapter(direction) {
+      isShopeeUnlocked = false;
+      const newIndex = currentChapterIndex + direction;
+      if (selectedStory && selectedStory.chapters && newIndex >= 0 && newIndex < selectedStory.chapters.length) {
+        document.getElementById('chapterSelect').value = newIndex;
+        changeChapter(newIndex);
+      }
+    }
+
+    function setReaderFontSize(size) {
+      const content = document.getElementById('chapterContent');
+      if (!content) return;
+      content.className = `text-gray-800 font-serif whitespace-pre-line space-y-4 leading-relaxed reader-text-${size}`;
+    }
+
+    function listenToComments(storyId) {
+      if (!db) return;
+      if (commentsUnsubscribe) commentsUnsubscribe();
+
+      commentsUnsubscribe = db.collection("stories").doc(storyId).collection("comments")
+        .orderBy("createdAt", "desc")
+        .onSnapshot((snapshot) => {
+          const commentList = document.getElementById('commentList');
+          if (!commentList) return;
+          let html = '';
+          snapshot.forEach((doc) => {
+            const c = doc.data();
+            const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString("vi-VN") : "Gần đây";
+            html += `
+              <div class="p-3.5 bg-rosebrand-50/40 rounded-2xl border border-rosebrand-100 text-xs space-y-1">
+                <div class="flex justify-between items-center font-bold text-rosebrand-600">
+                  <span class="flex items-center gap-1.5"><i class="fa-solid fa-user-circle"></i> ${c.author}</span>
+                  <span class="text-[10px] text-gray-400 font-normal">${dateStr}</span>
+                </div>
+                <p class="text-gray-700 font-sans leading-relaxed">${c.content}</p>
+              </div>
+            `;
+          });
+          commentList.innerHTML = html || '<p class="text-xs text-gray-400 italic text-center py-4">Chưa có bình luận nào. Hãy là người đầu tiên để lại nhắn gửi!</p>';
+        }, (err) => {
+          console.error("Comments error: ", err);
+        });
+    }
+
+    async function submitComment() {
+      const authorInput = document.getElementById('commentAuthor');
+      const contentInput = document.getElementById('commentInput');
+      const author = authorInput.value.trim() || 'Độc giả ẩn danh';
+      const content = contentInput.value.trim();
+
+      if (!content || !selectedStory) {
+        showToast("Vui lòng nhập nội dung bình luận!", "error");
+        return;
+      }
+
+      try {
+        await db.collection("stories").doc(selectedStory.id).collection("comments").add({
+          author: author,
+          content: content,
+          createdAt: new Date().toISOString()
+        });
+        contentInput.value = '';
+        showToast("Đã đăng bình luận!", "success");
+      } catch (e) {
+        showToast("Lỗi gửi bình luận: " + e.message, "error");
+      }
+    }
+
+    function showAdminModal() {
+      document.getElementById('passwordModal').classList.remove('hidden');
+    }
+    function closePasswordModal() {
+      document.getElementById('passwordModal').classList.add('hidden');
+    }
+    function verifyPassword() {
+      const input = document.getElementById('adminPasswordInput').value;
+      if (input === '261312') {
+        closePasswordModal();
+        document.getElementById('adminPasswordInput').value = '';
+        showAdminSection();
+        renderAdminStoryList(); // Gọi render danh sách ngay khi vào admin thành công
+        showToast("Đăng nhập quản trị thành công!", "success");
+      } else {
+        showToast("Mật khẩu quản trị không đúng!", "error");
+      }
+    }
+
+    function addChapterInput(title = '', content = '') {
+      const container = document.getElementById('chaptersContainer');
+      if (!container) return;
+      const div = document.createElement('div');
+      div.className = "p-3.5 bg-rosebrand-50/50 rounded-2xl border border-rosebrand-100 space-y-2 relative group";
+      div.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <input type="text" placeholder="Tên chương (VD: Chương 1 - Gặp gỡ)..." value="${title}" class="ch-title w-full px-3 py-1.5 bg-white border rounded-xl text-xs font-semibold">
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-xs text-red-500 font-bold hover:underline whitespace-nowrap">Xóa</button>
+        </div>
+        <textarea placeholder="Nội dung chi tiết chương truyện..." rows="3" class="ch-content w-full px-3 py-1.5 bg-white border rounded-xl text-xs font-serif">${content}</textarea>
+      `;
+      container.appendChild(div);
+    }
+
+    function resetForm() {
+      document.getElementById('editStoryId').value = '';
+      document.getElementById('storyForm').reset();
+      document.getElementById('chaptersContainer').innerHTML = '';
+      document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-rosebrand-500"></i> Thêm Truyện Mới`;
+      addChapterInput();
+    }
+
+    async function saveStory(e) {
+      e.preventDefault();
+      const storyId = document.getElementById('editStoryId').value;
+      const title = document.getElementById('formTitleInput').value.trim();
+      const category = document.getElementById('formCatSelect').value;
+      const cover = document.getElementById('formCoverInput').value.trim();
+      const shopeeLink = document.getElementById('formShopeeInput').value.trim();
+      const description = document.getElementById('formDescInput').value.trim();
+
+      const chapterNodes = document.querySelectorAll('#chaptersContainer > div');
+      let chapters = [];
+      chapterNodes.forEach(node => {
+        const chTitle = node.querySelector('.ch-title').value.trim();
+        const chContent = node.querySelector('.ch-content').value.trim();
+        if (chTitle && chContent) chapters.push({ title: chTitle, content: chContent });
+      });
+
+      const storyData = { title, category, cover, shopeeLink, description, chapters, updatedAt: new Date().toISOString() };
+
+      const btn = document.getElementById('btnSaveStory');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Đang lưu...`;
+
+      try {
+        if (storyId) {
+          await db.collection("stories").doc(storyId).update(storyData);
+          showToast("Đã cập nhật truyện thành công!", "success");
+        } else {
+          await db.collection("stories").add(storyData);
+          showToast("Đăng truyện mới thành công!", "success");
+        }
+        resetForm();
+      } catch (err) {
+        console.error("Save error: ", err);
+        showToast("Lỗi khi lưu Firestore: " + err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>Lưu Truyện Vào Firestore</span>`;
+      }
+    }
+
+    function renderAdminStoryList() {
+      const container = document.getElementById('adminStoryList');
+      if (!container) return;
+
+      if (window.allStories.length === 0) {
+        container.innerHTML = '<p class="text-xs text-gray-400 italic py-3 text-center">Chưa có dữ liệu truyện nào trên Firestore.</p>';
+        return;
+      }
+
+      container.innerHTML = window.allStories.map(s => `
+        <div class="flex items-center justify-between p-3.5 bg-rosebrand-50/40 rounded-2xl border border-rosebrand-100 gap-3">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <img src="${s.cover}" class="w-10 h-14 object-cover rounded-xl shadow-2xs flex-shrink-0" onerror="this.src='https://placehold.co/100x140/fecdd3/be123c?text=Di+Ha'">
+            <div class="truncate">
+              <h4 class="font-bold text-xs text-gray-800 truncate">${s.title}</h4>
+              <p class="text-[10px] text-rosebrand-600 font-semibold mt-0.5">${s.category} • ${s.chapters ? s.chapters.length : 0} chương</p>
+            </div>
+          </div>
+          <div class="flex gap-2 flex-shrink-0">
+            <button onclick="editStory('${s.id}')" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition shadow-2xs">Sửa</button>
+            <button onclick="deleteStory('${s.id}')" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition shadow-2xs">Xóa</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function editStory(storyId) {
+      const s = window.allStories.find(item => item.id === storyId);
+      if (!s) return;
+
+      document.getElementById('editStoryId').value = s.id;
+      document.getElementById('formTitleInput').value = s.title || '';
+      document.getElementById('formCatSelect').value = s.category || 'Truyện Ngắn';
+      document.getElementById('formCoverInput').value = s.cover || '';
+      document.getElementById('formShopeeInput').value = s.shopeeLink || '';
+      document.getElementById('formDescInput').value = s.description || '';
+      document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-rosebrand-500"></i> Chỉnh Sửa Truyện: ${s.title}`;
+
+      const container = document.getElementById('chaptersContainer');
+      container.innerHTML = '';
+      if (s.chapters && s.chapters.length > 0) {
+        s.chapters.forEach(ch => addChapterInput(ch.title, ch.content));
+      } else {
+        addChapterInput();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function deleteStory(storyId) {
+      if (confirm("Bạn có chắc chắn muốn xóa vĩnh viễn truyện này khỏi Firestore?")) {
+        try {
+          await db.collection("stories").doc(storyId).delete();
+          showToast("Đã xóa truyện khỏi Firebase!", "success");
+        } catch (err) {
+          showToast("Lỗi xóa truyện: " + err.message, "error");
+        }
+      }
+    }
+  </script>
+</body>
+</html>
